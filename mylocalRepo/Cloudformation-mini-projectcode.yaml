@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  AWS CloudFormation Sample Template VPC_with_PublicIPs_And_DNS: Sample template
+  that creates a VPC with DNS and public IPs enabled. Note that you are billed
+  for the AWS resources that you use when you create a stack from this template.
+
+Resources: # This is is required resource section that helps declares the AWS resources that we want to inclde in the stack. Example:EC2 or S3
+  VPC: # This is logical ID
+    Type: 'AWS::EC2::VPC' # This is the reource type identifies the type of resource that we are declaring here we have VPC
+    Properties: #This is the resource properties and addtional options that we can use to specify for a reource
+      EnableDnsSupport: 'true' # This will enable or make DNS support true
+      EnableDnsHostnames: 'true' # This will allow to enable/ create  DNS Hostnames
+      CidrBlock: 10.0.0.0/16 # # This will assign the  cidr 10.0.0.0/16 to our the VPC
+  PublicSubnet:  # This will allow to creat the public subnet for our VPC
+    Type: 'AWS::EC2::Subnet' #This is the reource type for VPC subnet
+    Properties: #This will contain and show the properties of subnet
+      VpcId: !Ref VPC  # This will refer to the logical ID VPC
+      CidrBlock: 10.0.0.0/24 # This will assign the  cidr 10.0.0.0/24 to our the subnet
+  InternetGateway: #This will allow creating internetgateway that will be connect to our VPC
+    Type: 'AWS::EC2::InternetGateway' # #This is the reource type for InternetGateway
+  VPCGatewayAttachment: #This will allow connecting our IGW to VPC ( Therefore our VPC should have internet connection)
+    Type: 'AWS::EC2::VPCGatewayAttachment' #This is the reource type for VPC Gateway Attachement
+    Properties:
+      VpcId: !Ref VPC # This will be refer to logical ID VPC
+      InternetGatewayId: !Ref InternetGateway # This will
+  PublicRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+  PublicRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: VPCGatewayAttachment # forcing depencing
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnetRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetNetworkAclAssociation: #This resource will  
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      NetworkAclId: !GetAtt 
+        - VPC
+        - DefaultNetworkAcl
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable HTTP ingress
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub '${AWS::StackName}-VPCID'
+  PublicSubnet:
+    Description: The subnet ID to use for public web servers
+    Value: !Ref PublicSubnet
+    Export:
+      Name: !Sub '${AWS::StackName}-SubnetID' #replacing a string
+  WebServerSecurityGroup:
+    Description: The security group ID to use for public web servers
+    Value: !GetAtt 
+      - WebServerSecurityGroup
+      - GroupId
+    Export:
+      Name: !Sub '${AWS::StackName}-SecurityGroupID'

@@ -1,7 +1,0 @@
-Resources:
-  MyS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: my-first-s3-bucket
-      AccessControl: Private
-      

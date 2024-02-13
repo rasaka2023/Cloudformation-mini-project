@@ -1,9 +1,0 @@
-#This is my first ec2 template
-AWSTemplateFormatVersion: "2010-09-09"
-Resources:
-  sakaEC2Instance:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: ami-0cf10cdf9fcd62d37  # Specify your desired AMI ID , have amazon Linux 2 for image
-      InstanceType: "t1.micro"  # Specify your desired instance type
-      KeyName: awesome-key-east1  # Specify your key pair name for SSH access

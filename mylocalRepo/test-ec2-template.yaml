@@ -1,0 +1,12 @@
+Description: This template is about creating ec2 instance through aws CLI
+
+
+AWSTemplateFormatVersion: "2010-09-09"
+Resources:
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0277155c3f0ab2930  # Specify the desired AMI ID
+      InstanceType: t2.micro          # Specify the instance type
+      KeyName: mpanther-key            # Specify the key pair name
+     
